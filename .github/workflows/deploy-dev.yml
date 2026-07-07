@@ -1,0 +1,152 @@
+name: 🚀 ITAduax - Universal IIS Deploy (Multi-App)
+
+on:
+  push:
+    branches: [ dev ]
+
+jobs:
+  deploy:
+    name: Despliegue - ${{ matrix.app.name }}
+    runs-on: [self-hosted, servidor-dev]
+    strategy:
+      fail-fast: false # Permite que si una app falla, la otra continúe el despliegue
+      matrix:
+        # === ÚNICA SECCIÓN A EDITAR PARA AGREGAR PROYECTOS ===
+                # --- Matrix: una entrada por aplicación a desplegar ---
+        # name         → Solo para logs / nombre del job (ej. DigitalizacionApi).
+        # project_path → Ruta al .csproj desde la raíz del repo.
+        # target_path  → Carpeta física en el servidor (Physical Path de IIS).
+        # pool         → Application Pool en IIS (se crea si no existe).
+        # app_name     → Nombre de la app bajo el sitio IIS → URL .../<app_name>/...        
+        app:
+          - { 
+              name: "DigitalizacionApi", 
+              project_path: "src/nombreProyecto/nombreProyecto.csproj", 
+              target_path: 'C:\inetpub\wwwroot\nombreProyecto', 
+              pool: "nombreProyecto", 
+              app_name: "nombreProyecto" 
+            }
+
+    env:
+      PUBLISH_PROFILE: 'FolderProfile'
+      IIS_SITE_NAME: 'Default Web Site'
+      MSBUILD_PATH: 'C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\MSBuild.exe'
+      VS_TOOLS_PATH: 'C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VisualStudio\v17.0'
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🛠️ Restaurar Paquetes NuGet (Multi-Framework)
+        shell: powershell
+        run: |
+          Write-Host "--- Restaurando paquetes para: ${{ matrix.app.name }} ---" -ForegroundColor Cyan
+          
+          # 1. Intentar con dotnet restore (Proyectos modernos)
+          dotnet restore "${{ matrix.app.project_path }}"
+
+          # 2. Intentar con NuGet.exe (Proyectos legacy .NET Framework)
+          if (!(Test-Path "nuget.exe")) {
+            Write-Host "Descargando NuGet.exe..."
+            Invoke-WebRequest "https://dist.nuget.org/win-x86-commandline/latest/nuget.exe" -OutFile "nuget.exe"
+          }
+
+          # Buscamos la solución (.sln) para que NuGet sepa dónde está la raíz de paquetes
+          $sln = Get-ChildItem -Path $pwd -Filter "*.sln" -Recurse | Select-Object -First 1
+          
+          if ($sln) {
+              Write-Host "Restaurando desde solución: $($sln.FullName)"
+              ./nuget.exe restore "$($sln.FullName)" -NonInteractive
+          } else {
+              Write-Host "No se encontró .sln, restaurando proyecto con PackagesDirectory forzado..."
+              $projectDir = Split-Path (Join-Path $pwd "${{ matrix.app.project_path }}") -Parent
+              $packagesDir = Join-Path (Split-Path $projectDir -Parent) "packages"
+              ./nuget.exe restore "${{ matrix.app.project_path }}" -PackagesDirectory $packagesDir -NonInteractive
+          }
+
+      - name: 🔍 Compilación y Empaquetado (MSBuild)
+        shell: powershell
+        run: |
+          $csprojFull = Join-Path $pwd "${{ matrix.app.project_path }}"
+          $projectDir = Split-Path $csprojFull -Parent
+          $artifactPath = Join-Path $projectDir "bin\app.publish"
+          
+          if (Test-Path $artifactPath) { Remove-Item -Recurse -Force $artifactPath }
+
+          Write-Host "--- Compilando ${{ matrix.app.name }} con MSBuild ---" -ForegroundColor Cyan
+          & "${{ env.MSBUILD_PATH }}" $csprojFull `
+            /p:Configuration=Release `
+            /p:DeployOnBuild=true `
+            /p:PublishProfile="${{ env.PUBLISH_PROFILE }}" `
+            /p:VSToolsPath="${{ env.VS_TOOLS_PATH }}" `
+            /t:Clean,Build,Publish `
+            /p:OutDir="bin\\" `
+            /verbosity:minimal
+
+          if (!(Test-Path $artifactPath) -or (Get-ChildItem $artifactPath).Count -eq 0) {
+              throw "Error: Salida de publicación vacía en $artifactPath"
+          }
+
+      - name: 🌐 Configuración Automática de IIS
+        shell: powershell
+        run: |
+          Import-Module WebAdministration
+          $pool = "${{ matrix.app.pool }}"
+          $site = "${{ env.IIS_SITE_NAME }}"
+          $appName = "${{ matrix.app.app_name }}"
+          $path = "${{ matrix.app.target_path }}"
+          
+          # 1. ASEGURAR QUE LA CARPETA FÍSICA EXISTA PRIMERO
+          if (!(Test-Path $path)) {
+              Write-Host "Creando directorio físico: $path" -ForegroundColor Cyan
+              New-Item -ItemType Directory -Force -Path $path
+          }
+
+          # 2. Gestionar Application Pool
+          if (!(Test-Path "IIS:\AppPools\$pool")) {
+              Write-Host "Creando Application Pool: $pool..." -ForegroundColor Yellow
+              New-WebAppPool -Name $pool
+              # Configuración estándar: .NET 4.0 (funciona para .NET Core/7/8/9 también)
+              Set-ItemProperty "IIS:\AppPools\$pool" -Name "managedRuntimeVersion" -Value "v4.0" 
+          } else {
+              Write-Host "El Pool $pool ya existe." -ForegroundColor Green
+          }
+
+          # 3. Gestionar la Aplicación (Ahora el path ya existe, no dará error)
+          if (!(Get-WebApplication -Site $site -Name $appName)) {
+              Write-Host "Convirtiendo carpeta en Aplicación IIS: $appName..." -ForegroundColor Yellow
+              New-WebApplication -Site $site -Name $appName -PhysicalPath $path -ApplicationPool $pool
+          } else {
+              Write-Host "La aplicación ya existe. Asegurando que use el Pool correcto..." -ForegroundColor Green
+              Set-ItemProperty "IIS:\Sites\$site\$appName" -Name "applicationPool" -Value $pool
+          }
+
+          # 4. Detener Pool para copia segura (idempotente)
+          $poolState = (Get-WebAppPoolState -Name $pool).Value
+          if ($poolState -ne "Stopped") {
+              Write-Host "Deteniendo Pool: $pool (estado actual: $poolState)..." -ForegroundColor Cyan
+              Stop-WebAppPool -Name $pool
+          } else {
+              Write-Host "El Pool $pool ya estaba detenido, omitiendo Stop." -ForegroundColor Yellow
+          }
+
+      - name: 🚀 Copia de Archivos y Arranque
+        shell: powershell
+        run: |
+          $csprojFull = Join-Path $pwd "${{ matrix.app.project_path }}"
+          $projectDir = Split-Path $csprojFull -Parent
+          $artifactPath = Join-Path $projectDir "bin\app.publish"
+
+          Write-Host "Copiando archivos a: ${{ matrix.app.target_path }}..." -ForegroundColor Cyan
+          Copy-Item -Path "$artifactPath\*" -Destination "${{ matrix.app.target_path }}" -Recurse -Force
+
+          Import-Module WebAdministration
+          $poolState = (Get-WebAppPoolState -Name "${{ matrix.app.pool }}").Value
+          if ($poolState -ne "Started") {
+              Write-Host "Iniciando App Pool: ${{ matrix.app.pool }} (estado actual: $poolState)..." -ForegroundColor Cyan
+              Start-WebAppPool -Name "${{ matrix.app.pool }}"
+          } else {
+              Write-Host "El Pool ${{ matrix.app.pool }} ya estaba iniciado." -ForegroundColor Green
+          }
+          
+          Write-Host "✅ ${{ matrix.app.name }} DESPLEGADO EXITOSAMENTE" -ForegroundColor Green
