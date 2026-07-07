@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!--Project was exported from assembly: C:\Users\Luis_\Downloads\appDocumentos Amazon - ALTERNO\appDocumentosCEDIS.exe-->
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{83513254-F4B7-4DF3-ADAA-43C8599B9FCA}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AssemblyName>appDocumentosCEDIS</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <ApplicationVersion>1.0.0.0</ApplicationVersion>
+    <FileAlignment>512</FileAlignment>
+    <RootNamespace>appDocumentosCEDIS</RootNamespace>
+    <LangVersion>10.0</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="AwsFileStorageNet">
+      <HintPath>lib\AwsFileStorageNet.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.VisualBasic" />
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\DLLs\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Seguridad">
+      <HintPath>lib\Seguridad.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UltimateFileSystem">
+      <HintPath>lib\UltimateFileSystem.dll</HintPath>
+    </Reference>
+    <Reference Include="UltimateFtp">
+      <HintPath>lib\UltimateFtp.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ManejoAWS.cs" />
+    <Compile Include="frmMain.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Conversions.cs" />
+    <Compile Include="My\MyApplication.cs" />
+    <Compile Include="My\MyComputer.cs" />
+    <Compile Include="My\MyProject.cs" />
+    <Compile Include="My\MySettings.cs" />
+    <Compile Include="My\MySettingsProperty.cs" />
+    <Compile Include="My\Resources\Resources.cs" />
+    <Compile Include="WCF_Documentos\IWCF_DocumentosVucem.cs" />
+    <Compile Include="WCF_Documentos\InsertaArchivosVucemRequest.cs" />
+    <Compile Include="WCF_Documentos\InsertaArchivosVucemResponse.cs" />
+    <Compile Include="WCF_Documentos\IWCF_DocumentosVucemChannel.cs" />
+    <Compile Include="WCF_Documentos\WCF_DocumentosVucemClient.cs" />
+    <Compile Include="WCF_Respaldo\IWCF_DocumentosVucem.cs" />
+    <Compile Include="WCF_Respaldo\IWCF_DocumentosVucemChannel.cs" />
+    <Compile Include="WCF_Respaldo\WCF_DocumentosVucemClient.cs" />
+    <Compile Include="appDocumentosCEDIS\Controllers\clsLog.cs" />
+    <Compile Include="appDocumentosCEDIS\Controllers\Configuraciones.cs" />
+    <Compile Include="appDocumentosCEDIS\Controllers\ManejoFTP.cs" />
+    <Compile Include="appDocumentosCEDIS\Entity\CE_Archivos.cs" />
+    <Compile Include="appDocumentosCEDIS\Entity\CE_FTP.cs" />
+    <Compile Include="appDocumentosCEDIS\Entity\CE_Procesos.cs" />
+    <Compile Include="AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="frmMain.resx" />
+    <EmbeddedResource Include="Resources.resx" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="config.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Include="App.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

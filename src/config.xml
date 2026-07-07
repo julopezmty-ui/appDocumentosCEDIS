@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Vucem>
+  <regex value="[a-zA-Z0-9]+_[T|t|E|e|V|v]{1}" />
+  <Archivos>
+    <Archivo id_num_doc="11" estatus="1" carpeta="PREVIOS_AUT" descripcion="Previo" ruta="D:\Users\COVE\PrevioVucem\INPUT\" />
+    <Archivo id_num_doc="31" estatus="1" carpeta="RECIBO_AUT" descripcion="Recibo" ruta="D:\Users\COVE\PrevioVucem\INPUT\" />
+    <Archivo id_num_doc="15" estatus="0" carpeta="DANOS_AUT" descripcion="Danos" ruta="D:\Users\COVE\PrevioVucem\INPUT\" />
+    <Archivo id_num_doc="32" estatus="1" carpeta="CARGAS_AUT" descripcion="Cargas" ruta="D:\Users\COVE\PrevioVucem\INPUT\" />
+    <Archivo id_num_doc="33" estatus="1" carpeta="REEXPEDICION_AUT" descripcion="Reexpedicion" ruta="D:\Users\COVE\PrevioVucem\INPUT\" />
+    <Archivo id_num_doc="34" estatus="1" carpeta="EMBARQUE_AUT" descripcion="Embarques" ruta="D:\Users\COVE\PrevioVucem\INPUT\" />
+    <Archivo id_num_doc="170" estatus="0" carpeta="FACTURAS_AUT" descripcion="Factura" ruta="D:\Users\COVE\PrevioVucem\INPUT\" />
+    <Archivo id_num_doc="42" estatus="0" carpeta="INBOND_AUT" descripcion="Inbond" ruta="D:\Users\COVE\PrevioVucem\INPUT\" />
+    <Archivo id_num_doc="49" estatus="0" carpeta="AES_AUT" descripcion="AES" ruta="D:\Users\COVE\PrevioVucem\INPUT\" />
+    <Archivo id_num_doc="35" estatus="0" carpeta="CINBOND_AUT" descripcion="Cancelacion_Inbond" ruta="D:\Users\COVE\PrevioVucem\INPUT\" />
+    <Archivo id_num_doc="46" estatus="0" carpeta="DE_PREVIA" descripcion="Documentos_Entrada_Previa" ruta="D:\Users\COVE\PrevioVucem\INPUT\" />
+    <Archivo id_num_doc="10" estatus="0" carpeta="GUIA_AUT" descripcion="Guia" ruta="D:\Users\COVE\PrevioVucem\INPUT\" />
+    <Archivo id_num_doc="55" estatus="0" carpeta="PINBOND_AUT" descripcion="Perforado_Inbond" ruta="D:\Users\COVE\PrevioVucem\INPUT\" />
+    <Archivo id_num_doc="11" estatus="1" carpeta="NOPREVIO_AUT" descripcion="NoPrevio" ruta="D:\Users\COVE\PrevioVucem\INPUT\" />
+  </Archivos>
+  <FTP Server="3j+b2F2K9+gOrRn18Lqngw==" User="PeA/0+/CSAo=" Pass="KhvOW+NnVKwDMeESMftD5Q==" Ping="1" />
+  <Procesos>
+    <Proceso id="T" descripcion="TRAFICO" esfoto="0" />
+    <Proceso id="P" descripcion="PEDIMENTO" esfoto="0" />
+    <Proceso id="E" descripcion="ENTRADA" esfoto="0" />
+    <Proceso id="V" descripcion="ENTRADA" esfoto="1" />
+  </Procesos>
+</Vucem>
